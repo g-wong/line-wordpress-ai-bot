@@ -1,0 +1,53 @@
+# LINE → Claude → WordPress ボット（クラウド版）
+# 中継スクリプト（gas/Code.gs）が LINE を受け取るたびに起動する。
+# 起動し損ねたときの取りこぼし対策として、3時間ごとにも確認する。
+name: LINE ボット
+
+on:
+  repository_dispatch:
+    types: [line]
+  schedule:
+    - cron: "0 */3 * * *"
+  workflow_dispatch:
+    inputs:
+      check:
+        description: "接続確認だけを行う（poller.py --check）"
+        type: boolean
+        default: false
+
+# 同時に2つ動かさない（後から来た起動は前の実行が終わるまで待つ）
+concurrency:
+  group: line-bot
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: 必要なものを入れる
+        run: |
+          pip install requests
+          npm install -g @anthropic-ai/claude-code
+
+      - name: LINE のメッセージを処理する
+        working-directory: line-bot
+        env:
+          GAS_URL: ${{ secrets.GAS_URL }}
+          GAS_SECRET: ${{ secrets.GAS_SECRET }}
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          WP_URL: ${{ secrets.WP_URL }}
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: python poller.py ${{ inputs.check && '--check' || '' }}

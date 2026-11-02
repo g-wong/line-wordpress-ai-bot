@@ -1,0 +1,13 @@
+# 秘密情報（絶対にコミットしない）
+.env
+line-bot/config.json
+
+# 実行時データ
+line-bot/state.json
+line-bot/*.log
+line-bot/*.lock
+line-bot/inbox/
+
+__pycache__/
+*.pyc
+.venv/
