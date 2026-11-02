@@ -10,3 +10,7 @@ GitHub Actions で動くので、ボット用のサーバーは要りません�
 - GitHub Actions のワークフロー: [.github/workflows/line-bot.yml](.github/workflows/line-bot.yml)
 
 パスワードやトークンは `config.json`（PC 版）または GitHub の Secrets（クラウド版）に置き、リポジトリには入れないでください。
+
+## ライセンス
+
+[Apache License 2.0](LICENSE)
